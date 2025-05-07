@@ -4,11 +4,11 @@ import { StyleSheet, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native"; // Importando NavigationContainer
 import { createNativeStackNavigator } from "@react-navigation/native-stack"; // Importando createNativeStackNavigator
 
+const Stack = createNativeStackNavigator();
+
 import TelaInicial from "./pages/TelaInicial";
 import AdicionarMed from "./pages/AdicionarMed";
 import HistoricoMed from "./pages/HistoricoMed";
-
-const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [medications, setMedications] = useState([]);

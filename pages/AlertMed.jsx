@@ -1,4 +1,3 @@
-//ALERT
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -53,6 +52,19 @@ export default function App() {
     alert("Notificação agendada!");
   }
 
+  // Função para testar a notificação agora
+  const testarNotificacaoAgora = async () => {
+    const agora = new Date();
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Hora do remédio",
+        body: `É hora de tomar: ${nomeRemedio}`,
+      },
+      trigger: agora,
+    });
+    alert("Notificação testada com sucesso!");
+  };
+
   const confirmar = () => {
     alert(`${nomeRemedio} tomado com sucesso!`);
     setModalVisible(false);
@@ -91,6 +103,13 @@ export default function App() {
         onChange={(event, selectedDate) => setHora(selectedDate || hora)}
       />
       <Button title="Agendar Lembrete" onPress={agendarNotificacao} />
+
+      {/* Botão de Testar Notificação Agora */}
+      <Button
+        title="Testar Notificação Agora"
+        onPress={testarNotificacaoAgora}
+        color="#ff5555"
+      />
 
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modal}>

@@ -1,5 +1,9 @@
-//HISTORICO
+// Tela de histórico de medicamentos
+
 import React, { useState, useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+
 import {
   View,
   Text,
@@ -7,43 +11,52 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Para ícones de relógio e lixeira
-import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons"; // Ícones para elementos visuais
+import { useNavigation } from "@react-navigation/native"; // Navegação entre telas
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Armazenamento local
 
 export default function HistoricoMed() {
-  const navigation = useNavigation();
-  const [medications, setMedications] = useState([]);
+  const navigation = useNavigation(); // Hook de navegação
+  const [medications, setMedications] = useState([]); // Lista de medicamentos
 
-  const markAsCompleted = (index) => {
+  // Marca um medicamento como concluído (não usado diretamente no código atual)
+  const markAsCompleted = async (index) => {
     const updated = [...medications];
     updated[index].completed = true;
     setMedications(updated);
+    await AsyncStorage.setItem("@medications", JSON.stringify(updated));
   };
 
-  const deleteMedication = (index) => {
+  // Exclui um medicamento da lista
+  const deleteMedication = async (index) => {
     const updated = [...medications];
-    updated.splice(index, 1);
+    updated.splice(index, 1); // Remove o item da posição "index"
     setMedications(updated);
+    await AsyncStorage.setItem("@medications", JSON.stringify(updated)); // Atualiza no armazenamento
   };
 
-  useEffect(() => {
-    const fetchMedications = async () => {
-      try {
-        const storedData = await AsyncStorage.getItem("@medications");
-        if (storedData) {
-          setMedications(JSON.parse(storedData));
+  // Busca medicamentos salvos ao iniciar a tela
+  useFocusEffect(
+    useCallback(() => {
+      const fetchMedications = async () => {
+        try {
+          const storedData = await AsyncStorage.getItem("@medications");
+          if (storedData) {
+            setMedications(JSON.parse(storedData));
+          } else {
+            setMedications([]); // Garante que zera se não houver dados
+          }
+        } catch (e) {
+          console.error("Erro ao buscar dados do AsyncStorage", e);
         }
-      } catch (e) {
-        console.error("Erro ao buscar dados do AsyncStorage", e);
-      }
-    };
+      };
 
-    fetchMedications();
-  }, []);
-
+      fetchMedications();
+    }, [])
+  );
   return (
     <View style={styles.container}>
+      {/* Cabeçalho com botão de adicionar */}
       <View style={styles.header}>
         <Text style={styles.title}>Minhas receitas</Text>
         <TouchableOpacity
@@ -53,10 +66,13 @@ export default function HistoricoMed() {
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      {/* Subtítulo de instrução */}
       <Text style={styles.subtitle}>
         Acompanhe seus medicamentos cadastrados e gerencie lembretes
       </Text>
 
+      {/* Lista de medicamentos */}
       <ScrollView style={{ padding: 20 }}>
         {medications.map((med, index) => (
           <View
@@ -66,6 +82,7 @@ export default function HistoricoMed() {
               med.completed ? styles.completedBox : styles.pendingBox,
             ]}
           >
+            {/* Cabeçalho do medicamento (nome + botão de excluir) */}
             <View style={styles.medHeader}>
               <Text style={styles.medName}>
                 <Ionicons name="medkit" size={18} color="#2b2b8a" />{" "}
@@ -76,11 +93,13 @@ export default function HistoricoMed() {
               </TouchableOpacity>
             </View>
 
+            {/* Exibe o primeiro horário */}
             <View style={styles.timeRow}>
               <Ionicons name="time" size={16} color="#555" />
               <Text style={styles.timeText}>Horário 1: {med.time1}</Text>
             </View>
 
+            {/* Se houver um segundo horário, exibe também */}
             {med.time2 ? (
               <View style={styles.timeRow}>
                 <Ionicons name="time" size={16} color="#555" />
@@ -88,10 +107,11 @@ export default function HistoricoMed() {
               </View>
             ) : null}
 
+            {/* Exibe os dias selecionados */}
             <Text style={{ fontSize: 13, color: "#333", marginTop: 6 }}>
               Dias:{" "}
               {Object.keys(med.days)
-                .filter((day) => med.days[day])
+                .filter((day) => med.days[day]) // Filtra apenas os dias marcados como true
                 .join(", ")}
             </Text>
           </View>
@@ -101,6 +121,7 @@ export default function HistoricoMed() {
   );
 }
 
+// Estilos da tela
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -129,16 +150,13 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     padding: 8,
   },
-  listContainer: {
-    flex: 1,
-  },
   medBox: {
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
   },
   completedBox: {
-    backgroundColor: "#a2d5f2",
+    backgroundColor: "#a2d5f2", // Fundo azul claro para medicamentos concluídos
   },
   pendingBox: {
     backgroundColor: "#f0f4ff",

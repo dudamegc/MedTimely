@@ -1,4 +1,4 @@
-//TELA INICIAL
+//TELA
 import React from "react";
 import {
   SafeAreaView,

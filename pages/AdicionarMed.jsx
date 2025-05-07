@@ -1,4 +1,5 @@
 //adicionarmed.jsx
+// Importação de bibliotecas necessárias do React e React Native
 import React, { useState } from "react";
 import {
   View,
@@ -9,12 +10,16 @@ import {
   ScrollView,
   ImageBackground,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // (Importado, mas ainda não usado)
 
+// Componente principal da tela
 export default function AdicionarMed() {
-  const [medicine, setMedicine] = useState("");
-  const [time1, setTime1] = useState("");
-  const [time2, setTime2] = useState("");
+  // Estados para guardar as informações inseridas pelo usuário
+  const [medicine, setMedicine] = useState(""); // Nome do remédio
+  const [time1, setTime1] = useState(""); // Primeiro horário do remédio
+  const [time2, setTime2] = useState(""); // Segundo horário do remédio
+
+  // Estado para controle dos dias da semana
   const [days, setDays] = useState({
     Seg: false,
     Ter: false,
@@ -24,28 +29,32 @@ export default function AdicionarMed() {
     Sab: false,
     Dom: false,
   });
-  const [medications, setMedications] = useState([]);
 
+  const [medications, setMedications] = useState([]); // Lista de medicamentos adicionados
+
+  // Alterna o estado de um dia (selecionado ou não)
   const toggleDay = (day) => {
     setDays((prevDays) => ({
       ...prevDays,
-      [day]: !prevDays[day],
+      [day]: !prevDays[day], // Inverte o valor atual do dia clicado
     }));
   };
 
+  // Formata o horário digitado manualmente para o formato HH:MM
   const handleTimeChange = (input, setTime) => {
-    let cleaned = input.replace(/[^0-9]/g, "");
+    let cleaned = input.replace(/[^0-9]/g, ""); // Remove tudo que não for número
 
     if (cleaned.length > 4) {
-      cleaned = cleaned.slice(0, 4);
+      cleaned = cleaned.slice(0, 4); // Limita a 4 dígitos
     }
 
     let formatted = "";
     if (cleaned.length > 0) {
-      let hours = cleaned.slice(0, 2).padStart(2, "0");
+      let hours = cleaned.slice(0, 2).padStart(2, "0"); // Pega as duas primeiras posições como horas
       let minutes =
-        cleaned.length > 2 ? cleaned.slice(2, 4).padStart(2, "0") : "00";
+        cleaned.length > 2 ? cleaned.slice(2, 4).padStart(2, "0") : "00"; // O resto como minutos
 
+      // Corrige horas fora do intervalo válido
       const hourNum = parseInt(hours, 10);
       if (hourNum > 23) {
         hours = "23";
@@ -53,6 +62,7 @@ export default function AdicionarMed() {
         hours = "00";
       }
 
+      // Corrige minutos fora do intervalo válido
       const minuteNum = parseInt(minutes, 10);
       if (minuteNum > 59) {
         minutes = "59";
@@ -60,17 +70,19 @@ export default function AdicionarMed() {
         minutes = "00";
       }
 
+      // Monta o horário formatado
       formatted = `${hours}:${minutes}`;
       if (cleaned.length <= 2) {
-        formatted = `${hours}:00`;
+        formatted = `${hours}:00`; // Exibe 00 minutos se só digitar horas
       } else if (cleaned.length === 3) {
-        formatted = `${hours}:0${minutes.charAt(0)}`;
+        formatted = `${hours}:0${minutes.charAt(0)}`; // Exibe minuto parcial se tiver 3 números
       }
     }
 
-    setTime(formatted);
+    setTime(formatted); // Atualiza o estado
   };
 
+  // Incrementa horas ou minutos
   const increaseTime = (type, time, setTime) => {
     let hours = parseInt(time.slice(0, 2), 10) || 0;
     let minutes = parseInt(time.slice(3, 5), 10) || 0;
@@ -81,6 +93,7 @@ export default function AdicionarMed() {
       minutes = minutes >= 59 ? 0 : minutes + 1;
     }
 
+    // Atualiza com novo valor formatado
     setTime(
       `${hours.toString().padStart(2, "0")}:${minutes
         .toString()
@@ -88,6 +101,7 @@ export default function AdicionarMed() {
     );
   };
 
+  // Decrementa horas ou minutos
   const decreaseTime = (type, time, setTime) => {
     let hours = parseInt(time.slice(0, 2), 10) || 0;
     let minutes = parseInt(time.slice(3, 5), 10) || 0;
@@ -98,36 +112,45 @@ export default function AdicionarMed() {
       minutes = minutes <= 0 ? 59 : minutes - 1;
     }
 
+    // Atualiza com novo valor formatado
     setTime(
       `${hours.toString().padStart(2, "0")}:${minutes
         .toString()
         .padStart(2, "0")}`
     );
   };
+  const salvarMedicamento = async (novoRemedio) => {
+    try {
+      const dadosExistentes = await AsyncStorage.getItem("@medications");
+      const medicamentosAntigos = dadosExistentes
+        ? JSON.parse(dadosExistentes)
+        : [];
 
-  const handleAddMedication = async () => {
-    if (!medicine || (!time1 && !time2)) return;
-    const newMedication = {
+      const novosMedicamentos = [...medicamentosAntigos, novoRemedio];
+
+      await AsyncStorage.setItem(
+        "@medications",
+        JSON.stringify(novosMedicamentos)
+      );
+    } catch (error) {
+      console.log("Erro ao salvar medicamento:", error);
+    }
+  };
+  // Adiciona o medicamento à lista e reseta os campos
+  const handleAddMedication = () => {
+    if (!medicine || (!time1 && !time2)) return; // Impede adicionar se faltar nome ou horários
+
+    const novoRemedio = {
       medicine,
       time1: time1 || "Não definido",
       time2: time2 || "Não definido",
       days,
     };
 
-    // Salvar no estado local
-    const updatedMedications = [...medications, newMedication];
-    setMedications(updatedMedications);
+    setMedications([...medications, novoRemedio]);
+    salvarMedicamento(novoRemedio);
 
-    // Salvar no AsyncStorage
-    try {
-      await AsyncStorage.setItem(
-        "@medications",
-        JSON.stringify(updatedMedications)
-      );
-    } catch (e) {
-      console.error("Erro ao salvar no AsyncStorage", e);
-    }
-
+    // Limpa os campos
     setMedicine("");
     setTime1("");
     setTime2("");
@@ -142,25 +165,15 @@ export default function AdicionarMed() {
     });
   };
 
-  async function salvarMedicamento(novoMed) {
-    try {
-      const armazenados = await AsyncStorage.getItem("@medications");
-      const listaAtual = armazenados ? JSON.parse(armazenados) : [];
-
-      listaAtual.push(novoMed); // adiciona o novo medicamento
-
-      await AsyncStorage.setItem("@medications", JSON.stringify(listaAtual));
-    } catch (e) {
-      console.error("Erro ao salvar medicamento:", e);
-    }
-  }
-
   return (
     <View style={styles.innerContainer}>
+      {/* Texto de instrução */}
       <Text style={styles.subtitle}>
         Adicione à sua prescrição médica para receber lembretes de quando tomar
         seu medicamento
       </Text>
+
+      {/* Formulário */}
       <View style={styles.form}>
         <Text style={styles.label}>Remédio</Text>
         <TextInput
@@ -169,6 +182,8 @@ export default function AdicionarMed() {
           value={medicine}
           onChangeText={setMedicine}
         />
+
+        {/* Primeiro horário */}
         <Text style={styles.label}>Horário 1</Text>
         <View style={styles.timeContainer}>
           <TextInput
@@ -179,6 +194,7 @@ export default function AdicionarMed() {
             keyboardType="numeric"
             maxLength={5}
           />
+          {/* Botões para aumentar/diminuir hora/minuto */}
           <View style={styles.arrowContainer}>
             <View style={styles.arrowSection}>
               <TouchableOpacity
@@ -210,6 +226,8 @@ export default function AdicionarMed() {
             </View>
           </View>
         </View>
+
+        {/* Segundo horário (mesma lógica do primeiro) */}
         <Text style={styles.label}>Horário 2</Text>
         <View style={styles.timeContainer}>
           <TextInput
@@ -251,6 +269,8 @@ export default function AdicionarMed() {
             </View>
           </View>
         </View>
+
+        {/* Seleção de dias da semana */}
         <Text style={styles.label}>Dias da semana</Text>
         <View style={styles.daysContainer}>
           {Object.keys(days).map((day) => (
@@ -263,6 +283,8 @@ export default function AdicionarMed() {
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Lista dos medicamentos já adicionados */}
         <ScrollView style={styles.medicationList}>
           {medications.map((med, index) => (
             <View key={index} style={styles.medicationBox}>
@@ -280,6 +302,8 @@ export default function AdicionarMed() {
             </View>
           ))}
         </ScrollView>
+
+        {/* Botão para adicionar medicamento */}
         <TouchableOpacity
           style={styles.addButton}
           onPress={handleAddMedication}
