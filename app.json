@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mytimely",
-    "slug": "mytimely",
+    "name": "medtimely",
+    "slug": "medtimely",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,6 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#002572"
     },
+
     "ios": {
       "supportsTablet": true
     },
@@ -24,6 +25,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "updates": {
+      "enabled": false
     }
   }
 }

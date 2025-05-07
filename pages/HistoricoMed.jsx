@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import { Alert } from "react-native";
 
 import {
   View,
@@ -20,9 +21,9 @@ export default function HistoricoMed() {
   const [medications, setMedications] = useState([]); // Lista de medicamentos
 
   // Marca um medicamento como concluído (não usado diretamente no código atual)
-  const markAsCompleted = async (index) => {
+  const toggleCompleted = async (index) => {
     const updated = [...medications];
-    updated[index].completed = true;
+    updated[index].completed = !updated[index].completed; // Alterna entre true/false
     setMedications(updated);
     await AsyncStorage.setItem("@medications", JSON.stringify(updated));
   };
@@ -35,6 +36,44 @@ export default function HistoricoMed() {
     await AsyncStorage.setItem("@medications", JSON.stringify(updated)); // Atualiza no armazenamento
   };
 
+  // Verifica se algum medicamento tem horário a ser lembrado
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
+      console.log(`Verificando horários: ${currentHour}:${currentMinute}`); // Debugging
+
+      medications.forEach((med) => {
+        console.log(`Verificando medicamento: ${med.medicine}`); // Debugging
+
+        if (med.time1) {
+          const [hour1, minute1] = med.time1.split(":").map(Number);
+          if (hour1 === currentHour && minute1 === currentMinute) {
+            console.log(`Alerta: Hora de tomar ${med.medicine} (1º horário)`); // Debugging
+            Alert.alert(
+              "Lembrete",
+              `Hora de tomar ${med.medicine} (1º horário)!`
+            );
+          }
+        }
+
+        if (med.time2) {
+          const [hour2, minute2] = med.time2.split(":").map(Number);
+          if (hour2 === currentHour && minute2 === currentMinute) {
+            console.log(`Alerta: Hora de tomar ${med.medicine} (2º horário)`); // Debugging
+            Alert.alert(
+              "Lembrete",
+              `Hora de tomar ${med.medicine} (2º horário)!`
+            );
+          }
+        }
+      });
+    }, 60000); // Verifica a cada minuto
+
+    return () => clearInterval(interval);
+  }, [medications]);
   // Busca medicamentos salvos ao iniciar a tela
   useFocusEffect(
     useCallback(() => {
@@ -88,9 +127,22 @@ export default function HistoricoMed() {
                 <Ionicons name="medkit" size={18} color="#2b2b8a" />{" "}
                 {med.medicine}
               </Text>
-              <TouchableOpacity onPress={() => deleteMedication(index)}>
-                <Ionicons name="trash" size={20} color="red" />
-              </TouchableOpacity>
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <TouchableOpacity onPress={() => toggleCompleted(index)}>
+                  <Ionicons
+                    name={
+                      med.completed
+                        ? "checkmark-circle"
+                        : "checkmark-circle-outline"
+                    }
+                    size={22}
+                    color={med.completed ? "green" : "#999"}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteMedication(index)}>
+                  <Ionicons name="trash" size={20} color="red" />
+                </TouchableOpacity>
+              </View>
             </View>
 
             {/* Exibe o primeiro horário */}
