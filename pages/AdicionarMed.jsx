@@ -1,6 +1,6 @@
 //adicionarmed.jsx
 // Importação de bibliotecas necessárias do React e React Native
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,10 +8,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  ImageBackground,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // (Importado, mas ainda não usado)
-import { Alert } from "react-native";
 
 // Componente principal da tela
 export default function AdicionarMed() {
@@ -33,44 +31,6 @@ export default function AdicionarMed() {
 
   const [medications, setMedications] = useState([]); // Lista de medicamentos adicionados
   // Tela principal ou componente de nível superior
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date();
-      const currentHour = now.getHours();
-      const currentMinute = now.getMinutes();
-
-      console.log(`Verificando horários: ${currentHour}:${currentMinute}`); // Debugging
-
-      medications.forEach((med) => {
-        console.log(`Verificando medicamento: ${med.medicine}`); // Debugging
-
-        if (med.time1) {
-          const [hour1, minute1] = med.time1.split(":").map(Number);
-          if (hour1 === currentHour && minute1 === currentMinute) {
-            console.log(`Alerta: Hora de tomar ${med.medicine} (1º horário)`); // Debugging
-            Alert.alert(
-              "Lembrete",
-              `Hora de tomar ${med.medicine} (1º horário)!`
-            );
-          }
-        }
-
-        if (med.time2) {
-          const [hour2, minute2] = med.time2.split(":").map(Number);
-          if (hour2 === currentHour && minute2 === currentMinute) {
-            console.log(`Alerta: Hora de tomar ${med.medicine} (2º horário)`); // Debugging
-            Alert.alert(
-              "Lembrete",
-              `Hora de tomar ${med.medicine} (2º horário)!`
-            );
-          }
-        }
-      });
-    }, 60000); // Verifica a cada minuto
-
-    return () => clearInterval(interval);
-  }, [medications]);
 
   // Alterna o estado de um dia (selecionado ou não)
   const toggleDay = (day) => {
@@ -182,9 +142,10 @@ export default function AdicionarMed() {
 
     const novoRemedio = {
       medicine,
-      time1: time1 || "Não definido",
-      time2: time2 || "Não definido",
+      time1,
+      time2,
       days,
+      completed: false,
     };
 
     setMedications([...medications, novoRemedio]);
@@ -365,7 +326,7 @@ const styles = StyleSheet.create({
     borderColor: "#000",
     borderRadius: 10,
     padding: 15,
-    backgroundColor: "rgba(245, 245, 245, 0.8)",
+    backgroundColor: "#e2e9ff",
     margin: 10,
   },
   header: {

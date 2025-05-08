@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
@@ -13,6 +14,12 @@ const TelaInicial = () => {
   const navigation = useNavigation();
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.logo}>
+        <Image
+          source={require("../assets/icon.png")}
+          style={{ width: 200, height: 100 }}
+        />
+      </View>
       <View style={styles.card}>
         <TouchableOpacity
           onPress={() => navigation.navigate("Adicionar Medicamento")}
@@ -33,12 +40,26 @@ const TelaInicial = () => {
           </Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.imagem}>
+        <Image
+          source={require("../assets/image1.png")}
+          style={{ width: 300, height: 150 }}
+        />
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  container: { flex: 1, padding: 16, backgroundColor: "#A4BFF7" },
+  logo: {
+    alignItems: "center",
+    margin: 10,
+  },
+  imagem: {
+    alignItems: "center",
+    margin: 150,
+  },
   card: {
     backgroundColor: "#f0f0f0",
     padding: 20,

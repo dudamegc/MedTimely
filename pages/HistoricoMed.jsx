@@ -51,10 +51,12 @@ export default function HistoricoMed() {
         if (med.time1) {
           const [hour1, minute1] = med.time1.split(":").map(Number);
           if (hour1 === currentHour && minute1 === currentMinute) {
-            console.log(`Alerta: Hora de tomar ${med.medicine} (1º horário)`); // Debugging
+            console.log(
+              `Alerta: Hora de tomar ${med.medicine} às ${med.time1}`
+            ); // Debugging
             Alert.alert(
               "Lembrete",
-              `Hora de tomar ${med.medicine} (1º horário)!`
+              `Hora de tomar ${med.medicine} às ${med.time1}!`
             );
           }
         }
@@ -62,10 +64,12 @@ export default function HistoricoMed() {
         if (med.time2) {
           const [hour2, minute2] = med.time2.split(":").map(Number);
           if (hour2 === currentHour && minute2 === currentMinute) {
-            console.log(`Alerta: Hora de tomar ${med.medicine} (2º horário)`); // Debugging
+            console.log(
+              `Alerta: Hora de tomar ${med.medicine} às ${med.time2}`
+            ); // Debugging
             Alert.alert(
               "Lembrete",
-              `Hora de tomar ${med.medicine} (2º horário)!`
+              `Hora de tomar ${med.medicine} às ${med.time2}!`
             );
           }
         }
