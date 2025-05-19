@@ -19,6 +19,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage"; // Armazen
 export default function HistoricoMed() {
   const navigation = useNavigation(); // Hook de navegação
   const [medications, setMedications] = useState([]); // Lista de medicamentos
+  const [triggeredTimes, setTriggeredTimes] = useState(new Set());
+
 
   // Marca um medicamento como concluído (não usado diretamente no código atual)
   const toggleCompleted = async (index) => {
@@ -30,14 +32,27 @@ export default function HistoricoMed() {
 
   // Exclui um medicamento da lista
   const deleteMedication = async (index) => {
-    
+    Alert.alert(
+      "Confirmar remoção",
+      "Você quer mesmo remover este medicamento?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel"
+        },
+        {
+          text: "Remover",
+          style: "destructive",
           onPress: async () => {
             const updated = [...medications];
             updated.splice(index, 1);
             setMedications(updated);
             await AsyncStorage.setItem("@medications", JSON.stringify(updated));
           }
-    
+        }
+      ],
+      { cancelable: true }
+    );
   };
 
   // Verifica se algum medicamento tem horário a ser lembrado
@@ -64,19 +79,18 @@ export default function HistoricoMed() {
               "Lembrete",
               `Hora de tomar ${med.medicine} às ${timeLabel}!`
             );
-            Alert.alert(
-              "Lembrete",
-              `Hora de tomar ${med.medicine} às ${med.time1}!`
-            );
             setTriggeredTimes((prev) => new Set(prev).add(`${med.medicine}-${timeLabel}`));
 
             setTimeout(() => {
-              Alert.alert(
-                "Lembrete",
-                `Ei, você se lembrou de tomar o ${med.medicine}? Se já tomou, é só um carinho passando pra cuidar de você`
-              );
-              console.log(`🔔 2º alerta de ${med.medicine} às ${timeLabel} + 5min`);
-            }, 5 * 60 * 1000); // 5 minutos
+              if (!secondTriggeredTimes.has(`${med.medicine}-${timeLabel}-2`)) {
+                Alert.alert(
+                  "Lembrete gentil",
+                  `Ei, você se lembrou de tomar o ${med.medicine}? Se já tomou, é só um carinho passando pra cuidar de você`
+                );
+                setSecondTriggeredTimes((prev) => new Set(prev).add(`${med.medicine}-${timeLabel}-2`));
+              }
+            }, 5 * 60 * 1000);
+            
           }
           });
         });
