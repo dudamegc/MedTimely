@@ -30,10 +30,14 @@ export default function HistoricoMed() {
 
   // Exclui um medicamento da lista
   const deleteMedication = async (index) => {
-    const updated = [...medications];
-    updated.splice(index, 1); // Remove o item da posição "index"
-    setMedications(updated);
-    await AsyncStorage.setItem("@medications", JSON.stringify(updated)); // Atualiza no armazenamento
+    
+          onPress: async () => {
+            const updated = [...medications];
+            updated.splice(index, 1);
+            setMedications(updated);
+            await AsyncStorage.setItem("@medications", JSON.stringify(updated));
+          }
+    
   };
 
   // Verifica se algum medicamento tem horário a ser lembrado
@@ -42,39 +46,51 @@ export default function HistoricoMed() {
       const now = new Date();
       const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
+      const currentTimeStr = `${String(currentHour).padStart(2, "0")}:${String(
+        currentMinute
+      ).padStart(2, "0")}`;
 
-      console.log(`Verificando horários: ${currentHour}:${currentMinute}`); // Debugging
-
+      console.log(
+        `Verificando horários: ${String(currentHour).padStart(2, "0")}:${String(currentMinute).padStart(2, "0")}`
+      );
+      
       medications.forEach((med) => {
-        console.log(`Verificando medicamento: ${med.medicine}`); // Debugging
+        [med.time1, med.time2].forEach((timeLabel) => {
+          if (!timeLabel) return;
 
-        if (med.time1) {
-          const [hour1, minute1] = med.time1.split(":").map(Number);
-          if (hour1 === currentHour && minute1 === currentMinute) {
-            console.log(
-              `Alerta: Hora de tomar ${med.medicine} às ${med.time1}`
-            ); // Debugging
+          if (timeLabel === currentTimeStr && !triggeredTimes.has(`${med.medicine}-${timeLabel}`)) {
+            // 1º ALERTA
+            Alert.alert(
+              "Lembrete",
+              `Hora de tomar ${med.medicine} às ${timeLabel}!`
+            );
             Alert.alert(
               "Lembrete",
               `Hora de tomar ${med.medicine} às ${med.time1}!`
             );
-          }
-        }
+            setTriggeredTimes((prev) => new Set(prev).add(`${med.medicine}-${timeLabel}`));
 
-        if (med.time2) {
-          const [hour2, minute2] = med.time2.split(":").map(Number);
-          if (hour2 === currentHour && minute2 === currentMinute) {
-            console.log(
-              `Alerta: Hora de tomar ${med.medicine} às ${med.time2}`
-            ); // Debugging
-            Alert.alert(
-              "Lembrete",
-              `Hora de tomar ${med.medicine} às ${med.time2}!`
-            );
+            setTimeout(() => {
+              Alert.alert(
+                "Lembrete",
+                `Ei, você se lembrou de tomar o ${med.medicine}? Se já tomou, é só um carinho passando pra cuidar de você`
+              );
+              console.log(`🔔 2º alerta de ${med.medicine} às ${timeLabel} + 5min`);
+            }, 5 * 60 * 1000); // 5 minutos
           }
-        }
+          });
+        });
+
+        const tenMinutesAgo = new Date(now.getTime() - 10 * 60000);
+      const pastTimeStr = `${String(tenMinutesAgo.getHours()).padStart(2, "0")}:${String(
+        tenMinutesAgo.getMinutes()
+      ).padStart(2, "0")}`;
+
+      setTriggeredTimes((prev) => {
+        const newSet = new Set([...prev].filter((key) => !key.endsWith(pastTimeStr)));
+        return newSet;
       });
-    }, 60000); // Verifica a cada minuto
+    }, 60000); // Verifica a cada 1 minuto
 
     return () => clearInterval(interval);
   }, [medications]);
