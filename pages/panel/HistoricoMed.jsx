@@ -11,6 +11,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Ícones para elementos visuais
 import { useNavigation } from "@react-navigation/native"; // Navegação entre telas
@@ -20,7 +21,6 @@ export default function HistoricoMed() {
   const navigation = useNavigation(); // Hook de navegação
   const [medications, setMedications] = useState([]); // Lista de medicamentos
   const [triggeredTimes, setTriggeredTimes] = useState(new Set());
-
 
   // Marca um medicamento como concluído (não usado diretamente no código atual)
   const toggleCompleted = async (index) => {
@@ -38,7 +38,7 @@ export default function HistoricoMed() {
       [
         {
           text: "Cancelar",
-          style: "cancel"
+          style: "cancel",
         },
         {
           text: "Remover",
@@ -48,8 +48,8 @@ export default function HistoricoMed() {
             updated.splice(index, 1);
             setMedications(updated);
             await AsyncStorage.setItem("@medications", JSON.stringify(updated));
-          }
-        }
+          },
+        },
       ],
       { cancelable: true }
     );
@@ -66,20 +66,27 @@ export default function HistoricoMed() {
       ).padStart(2, "0")}`;
 
       console.log(
-        `Verificando horários: ${String(currentHour).padStart(2, "0")}:${String(currentMinute).padStart(2, "0")}`
+        `Verificando horários: ${String(currentHour).padStart(2, "0")}:${String(
+          currentMinute
+        ).padStart(2, "0")}`
       );
-      
+
       medications.forEach((med) => {
         [med.time1, med.time2].forEach((timeLabel) => {
           if (!timeLabel) return;
 
-          if (timeLabel === currentTimeStr && !triggeredTimes.has(`${med.medicine}-${timeLabel}`)) {
+          if (
+            timeLabel === currentTimeStr &&
+            !triggeredTimes.has(`${med.medicine}-${timeLabel}`)
+          ) {
             // 1º ALERTA
             Alert.alert(
               "Lembrete",
               `Hora de tomar ${med.medicine} às ${timeLabel}!`
             );
-            setTriggeredTimes((prev) => new Set(prev).add(`${med.medicine}-${timeLabel}`));
+            setTriggeredTimes((prev) =>
+              new Set(prev).add(`${med.medicine}-${timeLabel}`)
+            );
 
             setTimeout(() => {
               if (!secondTriggeredTimes.has(`${med.medicine}-${timeLabel}-2`)) {
@@ -87,21 +94,25 @@ export default function HistoricoMed() {
                   "Lembrete gentil",
                   `Ei, você se lembrou de tomar o ${med.medicine}? Se já tomou, é só um carinho passando pra cuidar de você`
                 );
-                setSecondTriggeredTimes((prev) => new Set(prev).add(`${med.medicine}-${timeLabel}-2`));
+                setSecondTriggeredTimes((prev) =>
+                  new Set(prev).add(`${med.medicine}-${timeLabel}-2`)
+                );
               }
             }, 5 * 60 * 1000);
-            
           }
-          });
         });
+      });
 
-        const tenMinutesAgo = new Date(now.getTime() - 10 * 60000);
-      const pastTimeStr = `${String(tenMinutesAgo.getHours()).padStart(2, "0")}:${String(
-        tenMinutesAgo.getMinutes()
-      ).padStart(2, "0")}`;
+      const tenMinutesAgo = new Date(now.getTime() - 10 * 60000);
+      const pastTimeStr = `${String(tenMinutesAgo.getHours()).padStart(
+        2,
+        "0"
+      )}:${String(tenMinutesAgo.getMinutes()).padStart(2, "0")}`;
 
       setTriggeredTimes((prev) => {
-        const newSet = new Set([...prev].filter((key) => !key.endsWith(pastTimeStr)));
+        const newSet = new Set(
+          [...prev].filter((key) => !key.endsWith(pastTimeStr))
+        );
         return newSet;
       });
     }, 60000); // Verifica a cada 1 minuto
@@ -131,7 +142,12 @@ export default function HistoricoMed() {
     <View style={styles.container}>
       {/* Cabeçalho com botão de adicionar */}
       <View style={styles.header}>
-        <Text style={styles.title}>Minhas receitas</Text>
+        <Pressable
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={30} color={"#2b2b8a"} />
+        </Pressable>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate("Adicionar Medicamento")}
@@ -139,7 +155,7 @@ export default function HistoricoMed() {
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-
+      <Text style={styles.title}>Minhas receitas</Text>
       {/* Subtítulo de instrução */}
       <Text style={styles.subtitle}>
         Acompanhe seus medicamentos cadastrados e gerencie lembretes
@@ -268,5 +284,11 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 14,
     color: "#333",
+  },
+  backButton: {
+    padding: 8,
+
+    alignSelf: "flex-start",
+    justifyContent: "flex-start",
   },
 });

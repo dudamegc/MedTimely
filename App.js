@@ -6,15 +6,21 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"; // 
 
 const Stack = createNativeStackNavigator();
 
-import TelaInicial from "./pages/TelaInicial";
-import AdicionarMed from "./pages/AdicionarMed";
-import HistoricoMed from "./pages/HistoricoMed";
+import TelaInicial from "./pages/panel/TelaInicial";
+import AdicionarMed from "./pages/panel/AdicionarMed";
+import HistoricoMed from "./pages/panel/HistoricoMed";
+import Welcome from "./pages/auth/Welcome";
+import Login from "./pages/auth/Login";
+import Cadastro from "./pages/auth/Cadastro";
 
 export default function App() {
   const [medications, setMedications] = useState([]);
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Welcome" component={Welcome} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Cadastro" component={Cadastro} />
         <Stack.Screen name="Home" component={TelaInicial} />
         <Stack.Screen name="Adicionar Medicamento" component={AdicionarMed} />
         <Stack.Screen name="Historico" component={HistoricoMed} />

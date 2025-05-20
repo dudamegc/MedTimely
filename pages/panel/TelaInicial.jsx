@@ -16,7 +16,7 @@ const TelaInicial = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.logo}>
         <Image
-          source={require("../assets/icon.png")}
+          source={require("../../assets/icon.png")}
           style={{ width: 200, height: 100 }}
         />
       </View>
@@ -42,7 +42,7 @@ const TelaInicial = () => {
       </View>
       <View style={styles.imagem}>
         <Image
-          source={require("../assets/image1.png")}
+          source={require("../../assets/image1.png")}
           style={{ width: 300, height: 150 }}
         />
       </View>

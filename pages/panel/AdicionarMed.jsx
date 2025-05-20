@@ -8,11 +8,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Pressable,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // (Importado, mas ainda não usado)
-
+import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 // Componente principal da tela
 export default function AdicionarMed() {
+  const navigation = useNavigation();
   // Estados para guardar as informações inseridas pelo usuário
   const [medicine, setMedicine] = useState(""); // Nome do remédio
   const [time1, setTime1] = useState(""); // Primeiro horário do remédio
@@ -169,6 +172,9 @@ export default function AdicionarMed() {
   return (
     <View style={styles.innerContainer}>
       {/* Texto de instrução */}
+      <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back" size={30} color={"#2b2b8a"} />
+      </Pressable>
       <Text style={styles.subtitle}>
         Adicione à sua prescrição médica para receber lembretes de quando tomar
         seu medicamento
