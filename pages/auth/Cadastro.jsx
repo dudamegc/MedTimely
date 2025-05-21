@@ -14,7 +14,6 @@ import {
 import * as Animatable from "react-native-animatable";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../../lib/supabase";
 
 export default function Cadastro() {
   const navigation = useNavigation();
@@ -25,84 +24,103 @@ export default function Cadastro() {
   const [loading, setLoading] = useState(false);
 
   async function handleSignUp() {
-    setLoading(true);
-
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
-
-    setLoading(false);
-
-    if (error) {
-      Alert.alert("Erro ao cadastrar", error.message);
+    if (!name || !email || !password) {
+      Alert.alert("Preencha todos os campos.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert("Digite um email válido.");
       return;
     }
 
-    navigation.replace("Login");
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://192.168.68.110:3000/api/cadastro", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert(data.message);
+        // Redirecionar para a tela de login após o cadastro
+        navigation.navigate("Login");
+      } else {
+        Alert.alert("Erro", data.message || "Erro ao cadastrar.");
+      }
+    } catch (error) {
+      Alert.alert("Erro ao cadastrar. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
-return (
-  <SafeAreaView style={{ flex: 1 }}>
-    <ScrollView
-      contentContainerStyle={{
-        flex: 1,
-        backgroundColor: "#A4BFF7",
-      }}
-      keyboardShouldPersistTaps="handled" // opcional para fechar teclado ao clicar fora
-    >
-      <View style={styles.container}>
-        <Animatable.View
-          animation="fadeInLeft"
-          delay={500}
-          style={styles.containerHeader}
-        >
-          <Pressable
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={{
+          flex: 1,
+          backgroundColor: "#A4BFF7",
+        }}
+        keyboardShouldPersistTaps="handled" // opcional para fechar teclado ao clicar fora
+      >
+        <View style={styles.container}>
+          <Animatable.View
+            animation="fadeInLeft"
+            delay={500}
+            style={styles.containerHeader}
           >
-            <Ionicons name="arrow-back" size={30} color={"#2b2b8a"} />
-          </Pressable>
-          <View style={styles.logo}>
-            <Animatable.Image source={require("../../assets/icon.png")} />
-          </View>
-        </Animatable.View>
+            <Pressable
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="arrow-back" size={30} color={"#2b2b8a"} />
+            </Pressable>
+            <View style={styles.logo}>
+              <Animatable.Image source={require("../../assets/icon.png")} />
+            </View>
+          </Animatable.View>
 
-        <Animatable.View animation="fadeInUp" style={styles.containerForm}>
-          <Text style={styles.message}>Crie uma conta</Text>
-          <Text style={styles.title}>Nome Completo</Text>
-          <TextInput
-            placeholder="Nome Completo..."
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-          />
-          <Text style={styles.title}>Email</Text>
-          <TextInput
-            placeholder="Digite um email..."
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-          />
-          <Text style={styles.title}>Senha</Text>
-          <TextInput
-            placeholder="Digite sua senha..."
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+          <Animatable.View animation="fadeInUp" style={styles.containerForm}>
+            <Text style={styles.message}>Crie uma conta</Text>
+            <Text style={styles.title}>Nome Completo</Text>
+            <TextInput
+              placeholder="Nome Completo..."
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+            />
+            <Text style={styles.title}>Email</Text>
+            <TextInput
+              placeholder="Digite um email..."
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+            />
+            <Text style={styles.title}>Senha</Text>
+            <TextInput
+              placeholder="Digite sua senha..."
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
 
-          <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-            <Text style={styles.buttonText}>Cadastrar</Text>
-          </TouchableOpacity>
-        </Animatable.View>
-      </View>
-    </ScrollView>
-  </SafeAreaView>
-);
-
+            <TouchableOpacity style={styles.button} onPress={handleSignUp}>
+              <Text style={styles.buttonText}>Cadastrar</Text>
+            </TouchableOpacity>
+          </Animatable.View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
 const styles = StyleSheet.create({
   container: {
     paddingTop: 34,

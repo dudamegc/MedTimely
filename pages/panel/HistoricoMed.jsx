@@ -89,7 +89,7 @@ export default function HistoricoMed() {
             );
 
             setTimeout(() => {
-              if (!secondTriggeredTimes.has(`${med.medicine}-${timeLabel}-2`)) {
+              if (!triggeredTimes.has(`${med.medicine}-${timeLabel}-2`)) {
                 Alert.alert(
                   "Lembrete gentil",
                   `Ei, você se lembrou de tomar o ${med.medicine}? Se já tomou, é só um carinho passando pra cuidar de você`

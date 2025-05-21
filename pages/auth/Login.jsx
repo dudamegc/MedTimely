@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 
 import * as Animatable from "react-native-animatable";
@@ -17,7 +18,31 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState("false");
 
-  function handleSignIn() {}
+  async function handleSignIn() {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert("Preencha todos os campos.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch("http://192.168.68.110:3000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert("Login realizado com sucesso!");
+        navigation.navigate("Home");
+      } else {
+        Alert.alert("Erro", data.message || "Erro ao fazer login.");
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível conectar ao servidor.");
+    } finally {
+      setLoading(false);
+    }
+  }
   return (
     <View style={styles.container}>
       <Animatable.View
