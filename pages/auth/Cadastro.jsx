@@ -37,13 +37,16 @@ export default function Cadastro() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://192.168.68.110:3000/api/cadastro", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
+      const response = await fetch(
+        "https://b799-138-0-244-107.ngrok-free.app/api/cadastro",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name, email, password }),
+        }
+      );
 
       const data = await response.json();
 
