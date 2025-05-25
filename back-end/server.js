@@ -1,7 +1,9 @@
 // server.js
-const app = express();
 const express = require("express");
 const bodyParser = require("body-parser");
+
+const app = express();
+
 const corsOptions = {
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
