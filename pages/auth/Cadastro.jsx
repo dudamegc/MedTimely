@@ -38,7 +38,7 @@ export default function Cadastro() {
 
     try {
       const response = await fetch(
-        "https://b799-138-0-244-107.ngrok-free.app/api/cadastro",
+        "https://medtimely.onrender.com/api/cadastro",
         {
           method: "POST",
           headers: {

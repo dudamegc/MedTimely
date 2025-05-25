@@ -37,5 +37,5 @@ app.post("/api/login", (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log("Backend rodando em https://b799-138-0-244-107.ngrok-free.app ");
+  console.log("Backend rodando em https://medtimely.onrender.com");
 });
