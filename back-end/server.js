@@ -4,7 +4,18 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 
 const app = express();
-app.use(cors());
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // <-- Adicione esta linha!
+app.use(bodyParser.json());
 app.use(bodyParser.json());
 
 const users = []; // Simula um banco de dados em memória
