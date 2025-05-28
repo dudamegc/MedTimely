@@ -37,5 +37,5 @@ app.post("/api/login", (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log("Backend rodando em http://192.168.68.110:3000");
+  console.log("Backend rodando em http://10.30.101.36:3000");
 });

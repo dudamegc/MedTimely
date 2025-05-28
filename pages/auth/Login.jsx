@@ -25,7 +25,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      const response = await fetch("http://192.168.68.110:3000/api/login", {
+      const response = await fetch("http://10.30.101.36:3000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
