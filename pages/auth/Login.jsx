@@ -10,6 +10,8 @@ import {
 
 import * as Animatable from "react-native-animatable";
 import { useNavigation } from "@react-navigation/native";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebaseConfig.js";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -25,22 +27,16 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      const response = await fetch("http://10.30.101.36:3000/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert("Login realizado com sucesso!");
-        navigation.navigate("Home");
-      } else {
-        Alert.alert("Erro", data.message || "Erro ao fazer login.");
-      }
+      await signInWithEmailAndPassword(auth, email, password);
+      Alert.alert("Login realizado com sucesso!");
+      navigation.navigate("Home");
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível conectar ao servidor.");
-    } finally {
-      setLoading(false);
+      console.log(error.code);
+      if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
+        Alert.alert("Email ou senha inválidos.");
+      } else {
+        Alert.alert("Erro ao fazer login.");
+      }
     }
   }
   return (

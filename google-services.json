@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "309695981414",
+    "project_id": "medtimely-78c3e",
+    "storage_bucket": "medtimely-78c3e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:309695981414:android:8f4dcecd45358d051b8aa7",
+        "android_client_info": {
+          "package_name": "com.medtimely.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClVgdmmzQalbJrwf0nhJZA_bVBFL2QHpE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

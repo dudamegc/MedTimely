@@ -14,6 +14,8 @@ import {
 import * as Animatable from "react-native-animatable";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebaseConfig.js"; // Importando a configuração do Firebase
 
 export default function Cadastro() {
   const navigation = useNavigation();
@@ -28,6 +30,12 @@ export default function Cadastro() {
       Alert.alert("Preencha todos os campos.");
       return;
     }
+
+    if (password.length < 6) {
+      Alert.alert("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       Alert.alert("Digite um email válido.");
@@ -36,30 +44,25 @@ export default function Cadastro() {
 
     setLoading(true);
 
-    try {
-      const response = await fetch("http://10.30.101.36:3000/api/cadastro", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        Alert.alert(data.message);
-        // Redirecionar para a tela de login após o cadastro
-        navigation.navigate("Login");
-      } else {
-        Alert.alert("Erro", data.message || "Erro ao cadastrar.");
-      }
-    } catch (error) {
-      Alert.alert("Erro ao cadastrar. Tente novamente.");
-    } finally {
-      setLoading(false);
+      
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    Alert.alert("Usuário cadastrado com sucesso!");
+    navigation.navigate("Login");
+  } catch (error) {
+    console.log(error.code);
+    if (error.code === "auth/email-already-in-use") {
+      Alert.alert("Este e-mail já está em uso.");
+    } else if (error.code === "auth/invalid-email") {
+      Alert.alert("E-mail inválido.");
+    } else if (error.code === "auth/weak-password") {
+      Alert.alert("A senha deve ter pelo menos 6 caracteres.");
+    } else {
+      Alert.alert("Erro ao cadastrar.");
     }
   }
+}
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
