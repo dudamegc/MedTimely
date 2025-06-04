@@ -37,7 +37,7 @@ export default function Cadastro() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://192.168.68.110:3000/api/cadastro", {
+      const response = await fetch("http://192.168.68.106:3000/api/cadastro", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -89,9 +89,9 @@ export default function Cadastro() {
 
           <Animatable.View animation="fadeInUp" style={styles.containerForm}>
             <Text style={styles.message}>Crie uma conta</Text>
-            <Text style={styles.title}>Nome Completo</Text>
+            <Text style={styles.title}>Nome de Usuário</Text>
             <TextInput
-              placeholder="Nome Completo..."
+              placeholder="..."
               style={styles.input}
               value={name}
               onChangeText={setName}

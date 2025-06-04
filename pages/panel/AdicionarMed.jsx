@@ -1,5 +1,3 @@
-//adicionarmed.jsx
-// Importação de bibliotecas necessárias do React e React Native
 import React, { useState } from "react";
 import {
   View,
@@ -10,18 +8,16 @@ import {
   ScrollView,
   Pressable,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // (Importado, mas ainda não usado)
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-// Componente principal da tela
+
 export default function AdicionarMed() {
   const navigation = useNavigation();
-  // Estados para guardar as informações inseridas pelo usuário
-  const [medicine, setMedicine] = useState(""); // Nome do remédio
-  const [time1, setTime1] = useState(""); // Primeiro horário do remédio
-  const [time2, setTime2] = useState(""); // Segundo horário do remédio
+  const [medicine, setMedicine] = useState("");
+  const [time1, setTime1] = useState("");
+  const [time2, setTime2] = useState("");
 
-  // Estado para controle dos dias da semana
   const [days, setDays] = useState({
     Seg: false,
     Ter: false,
@@ -32,60 +28,37 @@ export default function AdicionarMed() {
     Dom: false,
   });
 
-  const [medications, setMedications] = useState([]); // Lista de medicamentos adicionados
-  // Tela principal ou componente de nível superior
+  const [medications, setMedications] = useState([]);
 
-  // Alterna o estado de um dia (selecionado ou não)
   const toggleDay = (day) => {
     setDays((prevDays) => ({
       ...prevDays,
-      [day]: !prevDays[day], // Inverte o valor atual do dia clicado
+      [day]: !prevDays[day],
     }));
   };
 
-  // Formata o horário digitado manualmente para o formato HH:MM
   const handleTimeChange = (input, setTime) => {
-    let cleaned = input.replace(/[^0-9]/g, ""); // Remove tudo que não for número
+    let cleaned = input.replace(/[^0-9]/g, ""); // Remove caracteres não numéricos
 
     if (cleaned.length > 4) {
-      cleaned = cleaned.slice(0, 4); // Limita a 4 dígitos
+      cleaned = cleaned.slice(0, 4); // Limita a 4 dígitos (HHMM)
     }
 
+    // Formata o input dinamicamente durante a digitação
     let formatted = "";
     if (cleaned.length > 0) {
-      let hours = cleaned.slice(0, 2).padStart(2, "0"); // Pega as duas primeiras posições como horas
-      let minutes =
-        cleaned.length > 2 ? cleaned.slice(2, 4).padStart(2, "0") : "00"; // O resto como minutos
-
-      // Corrige horas fora do intervalo válido
-      const hourNum = parseInt(hours, 10);
-      if (hourNum > 23) {
-        hours = "23";
-      } else if (hourNum < 0 || isNaN(hourNum)) {
-        hours = "00";
-      }
-
-      // Corrige minutos fora do intervalo válido
-      const minuteNum = parseInt(minutes, 10);
-      if (minuteNum > 59) {
-        minutes = "59";
-      } else if (minuteNum < 0 || isNaN(minuteNum)) {
-        minutes = "00";
-      }
-
-      // Monta o horário formatado
-      formatted = `${hours}:${minutes}`;
       if (cleaned.length <= 2) {
-        formatted = `${hours}:00`; // Exibe 00 minutos se só digitar horas
-      } else if (cleaned.length === 3) {
-        formatted = `${hours}:0${minutes.charAt(0)}`; // Exibe minuto parcial se tiver 3 números
+        formatted = cleaned; // Mostra apenas os números das horas (ex.: "12")
+      } else if (cleaned.length <= 4) {
+        const hours = cleaned.slice(0, 2);
+        const minutes = cleaned.slice(2, 4);
+        formatted = `${hours}:${minutes}`; // Formata como HH:MM
       }
     }
 
-    setTime(formatted); // Atualiza o estado
+    setTime(formatted);
   };
 
-  // Incrementa horas ou minutos
   const increaseTime = (type, time, setTime) => {
     let hours = parseInt(time.slice(0, 2), 10) || 0;
     let minutes = parseInt(time.slice(3, 5), 10) || 0;
@@ -96,7 +69,6 @@ export default function AdicionarMed() {
       minutes = minutes >= 59 ? 0 : minutes + 1;
     }
 
-    // Atualiza com novo valor formatado
     setTime(
       `${hours.toString().padStart(2, "0")}:${minutes
         .toString()
@@ -104,7 +76,6 @@ export default function AdicionarMed() {
     );
   };
 
-  // Decrementa horas ou minutos
   const decreaseTime = (type, time, setTime) => {
     let hours = parseInt(time.slice(0, 2), 10) || 0;
     let minutes = parseInt(time.slice(3, 5), 10) || 0;
@@ -115,13 +86,13 @@ export default function AdicionarMed() {
       minutes = minutes <= 0 ? 59 : minutes - 1;
     }
 
-    // Atualiza com novo valor formatado
     setTime(
       `${hours.toString().padStart(2, "0")}:${minutes
         .toString()
         .padStart(2, "0")}`
     );
   };
+
   const salvarMedicamento = async (novoRemedio) => {
     try {
       const dadosExistentes = await AsyncStorage.getItem("@medications");
@@ -139,9 +110,9 @@ export default function AdicionarMed() {
       console.log("Erro ao salvar medicamento:", error);
     }
   };
-  // Adiciona o medicamento à lista e reseta os campos
+
   const handleAddMedication = () => {
-    if (!medicine || (!time1 && !time2)) return; // Impede adicionar se faltar nome ou horários
+    if (!medicine || (!time1 && !time2)) return;
 
     const novoRemedio = {
       medicine,
@@ -154,7 +125,6 @@ export default function AdicionarMed() {
     setMedications([...medications, novoRemedio]);
     salvarMedicamento(novoRemedio);
 
-    // Limpa os campos
     setMedicine("");
     setTime1("");
     setTime2("");
@@ -171,7 +141,6 @@ export default function AdicionarMed() {
 
   return (
     <View style={styles.innerContainer}>
-      {/* Texto de instrução */}
       <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={30} color={"#2b2b8a"} />
       </Pressable>
@@ -180,7 +149,6 @@ export default function AdicionarMed() {
         seu medicamento
       </Text>
 
-      {/* Formulário */}
       <View style={styles.form}>
         <Text style={styles.label}>Remédio</Text>
         <TextInput
@@ -190,7 +158,6 @@ export default function AdicionarMed() {
           onChangeText={setMedicine}
         />
 
-        {/* Primeiro horário */}
         <Text style={styles.label}>Horário 1</Text>
         <View style={styles.timeContainer}>
           <TextInput
@@ -201,40 +168,8 @@ export default function AdicionarMed() {
             keyboardType="numeric"
             maxLength={5}
           />
-          {/* Botões para aumentar/diminuir hora/minuto */}
-          <View style={styles.arrowContainer}>
-            <View style={styles.arrowSection}>
-              <TouchableOpacity
-                onPress={() => increaseTime("hours", time1, setTime1)}
-                style={styles.arrowButton}
-              >
-                <Text style={styles.arrowText}>🔼</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => decreaseTime("hours", time1, setTime1)}
-                style={styles.arrowButton}
-              >
-                <Text style={styles.arrowText}>🔽</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.arrowSection}>
-              <TouchableOpacity
-                onPress={() => increaseTime("minutes", time1, setTime1)}
-                style={styles.arrowButton}
-              >
-                <Text style={styles.arrowText}>🔼</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => decreaseTime("minutes", time1, setTime1)}
-                style={styles.arrowButton}
-              >
-                <Text style={styles.arrowText}>🔽</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
         </View>
 
-        {/* Segundo horário (mesma lógica do primeiro) */}
         <Text style={styles.label}>Horário 2</Text>
         <View style={styles.timeContainer}>
           <TextInput
@@ -245,39 +180,8 @@ export default function AdicionarMed() {
             keyboardType="numeric"
             maxLength={5}
           />
-          <View style={styles.arrowContainer}>
-            <View style={styles.arrowSection}>
-              <TouchableOpacity
-                onPress={() => increaseTime("hours", time2, setTime2)}
-                style={styles.arrowButton}
-              >
-                <Text style={styles.arrowText}>🔼</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => decreaseTime("hours", time2, setTime2)}
-                style={styles.arrowButton}
-              >
-                <Text style={styles.arrowText}>🔽</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.arrowSection}>
-              <TouchableOpacity
-                onPress={() => increaseTime("minutes", time2, setTime2)}
-                style={styles.arrowButton}
-              >
-                <Text style={styles.arrowText}>🔼</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => decreaseTime("minutes", time2, setTime2)}
-                style={styles.arrowButton}
-              >
-                <Text style={styles.arrowText}>🔽</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
         </View>
 
-        {/* Seleção de dias da semana */}
         <Text style={styles.label}>Dias da semana</Text>
         <View style={styles.daysContainer}>
           {Object.keys(days).map((day) => (
@@ -291,7 +195,6 @@ export default function AdicionarMed() {
           ))}
         </View>
 
-        {/* Lista dos medicamentos já adicionados */}
         <ScrollView style={styles.medicationList}>
           {medications.map((med, index) => (
             <View key={index} style={styles.medicationBox}>
@@ -310,7 +213,6 @@ export default function AdicionarMed() {
           ))}
         </ScrollView>
 
-        {/* Botão para adicionar medicamento */}
         <TouchableOpacity
           style={styles.addButton}
           onPress={handleAddMedication}
