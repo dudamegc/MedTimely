@@ -10,6 +10,7 @@ import {
 
 import * as Animatable from "react-native-animatable";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -32,15 +33,10 @@ export default function Login() {
       });
       const data = await response.json();
       if (response.ok) {
-        // Substitua pela URL do webhook do dispositivo (ex: gerada pelo webhook.site)
-        const webhookUrl =
-          "https://webhook.site/18463e89-dd66-446b-9fe4-3afff24bf4a7";
-        await fetch("http://192.168.68.106:3000/api/register-webhook", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, webhookUrl }),
-        });
-
+        // Salva o email globalmente (Exemplo com AsyncStorage)
+        await AsyncStorage.setItem("userEmail", email);
+        // ou se estiver usando context:
+        // setUserEmail(email);
         Alert.alert("Login realizado com sucesso!");
         navigation.navigate("Home");
       } else {

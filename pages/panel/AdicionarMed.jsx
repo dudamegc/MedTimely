@@ -111,7 +111,12 @@ export default function AdicionarMed() {
     }
   };
 
-  const handleAddMedication = () => {
+  const handleAddMedication = async () => {
+    const userEmail = await AsyncStorage.getItem("@userEmail");
+    if (!userEmail) {
+      console.error("Email do usuário não encontrado.");
+      return;
+    }
     if (!medicine || (!time1 && !time2)) return;
 
     const novoRemedio = {
@@ -122,8 +127,38 @@ export default function AdicionarMed() {
       completed: false,
     };
 
-    setMedications([...medications, novoRemedio]);
+    setMedications((prevMedications) => [...prevMedications, novoRemedio]);
     salvarMedicamento(novoRemedio);
+
+    // Convert days object to comma-separated string of numbers
+    const selectedDays = Object.keys(days)
+      .filter((day) => days[day])
+      .map((day) => {
+        switch (day) {
+          case "Seg":
+            return 1;
+          case "Ter":
+            return 2;
+          case "Qua":
+            return 3;
+          case "Qui":
+            return 4;
+          case "Sex":
+            return 5;
+          case "Sab":
+            return 6;
+          case "Dom":
+            return 0;
+          default:
+            return -1; // Invalid day
+        }
+      })
+      .filter((day) => day !== -1) // Remove invalid days
+      .join(",");
+
+    // Agendar notificação
+    scheduleWebhookNotification(userEmail, medicine, time1, selectedDays);
+    console.log("Novo remédio adicionado:", novoRemedio);
 
     setMedicine("");
     setTime1("");

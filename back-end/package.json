@@ -17,6 +17,8 @@
   "devDependencies": {
     "@types/body-parser": "^1.19.5",
     "@types/cors": "^2.8.18",
-    "@types/express": "^5.0.2"
+    "@types/express": "^5.0.2",
+    "@types/node-schedule": "^2.1.7",
+    "@types/nodemailer": "^6.4.17"
   }
 }

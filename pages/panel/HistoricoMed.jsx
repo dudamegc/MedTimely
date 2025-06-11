@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
+import Config from "react-native-config";
+import { API_URL } from "@env";
 
 import {
   View,
@@ -22,6 +24,55 @@ export default function HistoricoMed() {
   const [medications, setMedications] = useState([]); // Lista de medicamentos
   const [triggeredTimes, setTriggeredTimes] = useState(new Set());
 
+  const handleSubmit = async (message) => {
+    console.log("Config.API_URL:", API_URL);
+    console.log("Requisição será enviada para:", `${API_URL}/api/send-email`);
+    const userEmail = await AsyncStorage.getItem("userEmail");
+    console.log("Email do usuário:", userEmail);
+    console.log("Mensagem a enviar:", message);
+
+    const bodyToSend = {
+      email: String(userEmail),
+      mensagem: message,
+    };
+    console.log("Corpo da requisição:", JSON.stringify(bodyToSend));
+    try {
+      const userEmail = await AsyncStorage.getItem("userEmail");
+      if (!userEmail) {
+        console.error("Email do usuário não encontrado no AsyncStorage");
+        return;
+      }
+
+      const apiUrl = API_URL;
+
+      const response = await fetch(`${API_URL}/api/send-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: String(userEmail), mensagem: message }), // aqui backend espera "mensagem"
+      });
+
+      const contentType = response.headers.get("Content-Type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log("Resposta do backend:", data);
+        if (response.ok) {
+          console.log("Email enviado com sucesso");
+        } else {
+          console.error("Erro ao enviar email:", data.message);
+          Alert.alert("Erro ao enviar email:", data.message);
+        }
+      } else {
+        console.error("Resposta do backend não é JSON:", await response.text());
+        Alert.alert(
+          "Erro",
+          "Resposta do servidor inválida. Contacte o suporte."
+        );
+      }
+    } catch (error) {
+      console.error("Erro na requisição:", error.message, error.stack);
+      Alert.alert("Erro na requisição:", error.message);
+    }
+  };
   // Marca um medicamento como concluído (não usado diretamente no código atual)
   const toggleCompleted = async (index) => {
     const updated = [...medications];
@@ -82,19 +133,26 @@ export default function HistoricoMed() {
             // 1º ALERTA
             Alert.alert(
               "Lembrete",
-              `Hora de tomar ${med.medicine} às ${timeLabel}!`
+              `Hora de tomar ${med.medicine} às ${timeLabel}!`,
+              [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    const reminderMessage =
+                      "Lembrete: tomar " + med.medicine + " às " + timeLabel;
+                    handleSubmit(encodeURIComponent(reminderMessage));
+                  },
+                },
+              ],
+              { cancelable: false }
             );
-            setTriggeredTimes((prev) =>
-              new Set(prev).add(`${med.medicine}-${timeLabel}`)
-            );
-
             setTimeout(() => {
               if (!triggeredTimes.has(`${med.medicine}-${timeLabel}-2`)) {
                 Alert.alert(
                   "Lembrete gentil",
                   `Ei, você se lembrou de tomar o ${med.medicine}? Se já tomou, é só um carinho passando pra cuidar de você`
                 );
-                setSecondTriggeredTimes((prev) =>
+                setTriggeredTimes((prev) =>
                   new Set(prev).add(`${med.medicine}-${timeLabel}-2`)
                 );
               }
